@@ -1,25 +1,35 @@
-# App Manager
+<p align="center">
+  <img src="docs/assets/icon.png" width="96" alt="App Manager icon">
+</p>
 
-**One list of everything installed on your Linux desktop, with a checkbox and a Remove button.**
+<h1 align="center">App Manager</h1>
+
+<p align="center">
+  <b>One list of everything installed on your Linux desktop, with a checkbox and a Remove button.</b>
+</p>
+
+<p align="center">
+  <a href="https://haloman363.github.io/app-manager/">Website</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#what-it-finds">What it finds</a> ·
+  <a href="#safety">Safety</a>
+  <br><br>
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
+  <img alt="GTK 4 + libadwaita" src="https://img.shields.io/badge/GTK4-libadwaita-3584e4">
+  <img alt="Python 3" src="https://img.shields.io/badge/python-3-yellow">
+  <img alt="Made for Bazzite, Silverblue and Kinoite" src="https://img.shields.io/badge/for-Bazzite%20%7C%20Silverblue%20%7C%20Kinoite-5b6270">
+</p>
+
+<p align="center">
+  <picture>
+    <source srcset="docs/assets/main-light.png" media="(prefers-color-scheme: light)">
+    <img src="docs/assets/main-dark.png" width="760" alt="App Manager listing Flatpak, Homebrew, AppImage, Steam and system apps">
+  </picture>
+</p>
 
 Think Windows "Installed apps", for immutable Fedora desktops (Bazzite, Silverblue, Kinoite)
 where software comes from a pile of different places. Flatpaks, Homebrew, layered packages,
 AppImages, Steam games and hand-installed apps all show up in one searchable window.
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ ⟳  ⛶                 App Manager        ☰   [Remove (2)] │
-│                   144 apps · 16 updates                  │
-│ ┌────────────────────────────┐ [All (144) ▾] [Name ▾]    │
-│ │ 🔍 Search installed apps   │                           │
-│ └────────────────────────────┘                           │
-│ ☑ 🟩 Bambu Studio     Flatpak · 2.8.2 · 1.0 GB       ⓘ   │
-│ ☐ ▶  atuin            Homebrew · 18.19 · 46 MB  Update ⓘ │
-│ ☑ 🔷 ArtCraft         AppImage · 0.2.0 · 11 MB       ⓘ   │
-│ ☐ 🎮 Garry's Mod      Steam                          ⓘ   │
-│ ☐ 🧱 Dolphin          System · 26.08 · 13 MB  System ⓘ   │
-└──────────────────────────────────────────────────────────┘
-```
 
 ## Quick start
 
@@ -76,6 +86,10 @@ Sources that are not installed on your machine (no `brew`, no `distrobox`) are s
 
 ## Safety
 
+<p align="center">
+  <img src="docs/assets/remove-dark.png" width="640" alt="Confirmation dialog showing the exact commands that will run">
+</p>
+
 - **Nothing runs until you confirm**, and the dialog lists the exact commands.
 - **AppImage and Local removals go to the trash**, so you can get them back.
 - **System apps are marked** with an amber "System" label. Removing one is an
@@ -85,6 +99,10 @@ Sources that are not installed on your machine (no `brew`, no `distrobox`) are s
 - **Core packages are locked**: the Plasma shell, System Settings, `sddm`, `kwin`,
   `rpm-ostree` and the `bazzite` meta package cannot be removed from here.
 - Other base packages (a file manager, a terminal) *can* be removed. Read the warning first.
+
+<p align="center">
+  <img src="docs/assets/system-dark.png" width="640" alt="System apps carry an amber label; core packages are greyed out">
+</p>
 
 ## FAQ
 
@@ -114,8 +132,9 @@ It is a single file, `appmanager.py`. Each source is a small generator function 
 `App` records (name, source, version, size, the command that removes it). The window just
 lists them.
 
-`./appmanager.py --shot out.png [seconds]` saves a screenshot of the window and quits, which
-is handy for checking UI changes without clicking around.
+`./appmanager.py --demo` fills the window with fake sample apps and never runs a command,
+so it is safe for trying the UI and taking screenshots. `--shot out.png [seconds]` saves a
+screenshot of the window and quits.
 
 ## License
 

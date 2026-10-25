@@ -23,6 +23,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 os.environ["PATH"] += ":/home/linuxbrew/.linuxbrew/bin"  # desktop launches lack brew on PATH
 
 HOME = Path.home()
+DEMO = "--demo" in sys.argv  # fake sample apps; nothing is ever executed (for screenshots and trying the UI)
 APPIMAGE_DIRS = [HOME / d for d in ("Applications", "AppImages", ".local/bin", "bin", "Downloads", "Desktop")] + [Path("/opt")]
 APP_ID = "io.github.haloman363.AppManager"
 OPT = (HOME / ".local/opt").resolve()  # resolved: /home is a symlink to /var/home
@@ -108,6 +109,8 @@ def distrobox_apps():
 
 
 def pending_updates():  # {(source, id)} with a newer version available
+    if DEMO:
+        return {(d[1], d[2]) for d in DEMO_APPS if d[6]}
     ups = {("Flatpak", i) for i in run("flatpak", "remote-ls", "--updates", "--app", "--columns=application").split()}
     return ups | {("Homebrew", n) for n in run("brew", "outdated", "--formula", "--quiet").split()}
 
@@ -220,23 +223,56 @@ def appimage_apps():
                   ["gio", "trash", str(path), *map(str, e["extra"])], e["icon"], size, str(path))  # trash = recoverable
 
 
-SOURCE_ICONS = {  # first icon present in the theme wins
-    "Flatpak": ["flatpak-discover", "package-x-generic"],
-    "Homebrew": ["utilities-terminal", "application-x-executable"],
-    "rpm-ostree": ["system-software-install", "package-x-generic"],
-    "Distrobox": ["container", "utilities-terminal"],
-    "AppImage": ["application-x-executable", "package-x-generic"],
-    "Steam": ["steam", "applications-games"],
-    "Local": ["folder-download", "application-x-executable"],
-    "System": ["computer", "preferences-system"],
-}
+DEMO_APPS = [  # name, source, id, version, MB, icon, has update
+    ("VLC", "Flatpak", "org.videolan.VLC", "3.0.21", 356, "org.videolan.VLC", True),
+    ("GIMP", "Flatpak", "org.gimp.GIMP", "3.0.4", 784, "org.gimp.GIMP", False),
+    ("Discord", "Flatpak", "com.discordapp.Discord", "0.0.98", 412, "com.discordapp.Discord", True),
+    ("Kdenlive", "Flatpak", "org.kde.kdenlive", "25.04.2", 523, "org.kde.kdenlive", False),
+    ("Flatseal", "Flatpak", "com.github.tchx84.Flatseal", "2.3.1", 3, "com.github.tchx84.Flatseal", False),
+    ("Inkscape", "Flatpak", "org.inkscape.Inkscape", "1.4.2", 409, "", False),
+    ("OBS Studio", "Flatpak", "com.obsproject.Studio", "31.0.3", 287, "", True),
+    ("Blender", "Flatpak", "org.blender.Blender", "4.4.3", 1331, "", False),
+    ("bat", "Homebrew", "bat", "0.25.0", 6, "", False),
+    ("btop", "Homebrew", "btop", "1.4.2", 3, "btop", False),
+    ("ffmpeg", "Homebrew", "ffmpeg", "7.1.1", 54, "", True),
+    ("neovim", "Homebrew", "neovim", "0.11.1", 29, "", False),
+    ("ripgrep", "Homebrew", "ripgrep", "14.1.1", 5, "", False),
+    ("htop", "rpm-ostree", "htop", "3.4.1", 0, "", False),
+    ("wireguard-tools", "rpm-ostree", "wireguard-tools", "1.0.2", 0, "", False),
+    ("fedora-dev", "Distrobox", "fedora-dev", "fedora:latest", 0, "", False),
+    ("ubuntu-build", "Distrobox", "ubuntu-build", "ubuntu:24.04", 0, "", False),
+    ("Obsidian", "AppImage", "~/Applications/Obsidian-1.8.9.AppImage", "1.8.9", 118, "", False),
+    ("PrusaSlicer", "AppImage", "~/Applications/PrusaSlicer-2.9.1.AppImage", "2.9.1", 164, "", False),
+    ("Balena Etcher", "AppImage", "~/Applications/balenaEtcher.AppImage", "1.19.25", 102, "", False),
+    ("Hades", "Steam", "1145360", "", 0, "", False),
+    ("Celeste", "Steam", "504230", "", 0, "", False),
+    ("Stardew Valley", "Steam", "413150", "", 0, "", False),
+    ("Android Studio", "Local", "~/.local/opt/android-studio", "", 1126, "", False),
+    ("Postman", "Local", "~/.local/opt/Postman", "", 421, "", False),
+    ("Dolphin", "System", "dolphin", "25.04.1", 13, "org.kde.dolphin", False),
+    ("Firewall", "System", "firewalld", "2.3.1", 4, "firewall-config", False),
+    ("Disks", "System", "gnome-disk-utility", "46.1", 7, "org.gnome.DiskUtility", False),
+    ("Steam", "System", "steam", "1.0.0.82", 4, "steam", False),
+    ("System Settings", "System", "", "6.3.5", 9, "systemsettings", False),
+]
+
+
+def demo_apps():
+    for name, source, ident, ver, mb, icon, _ in DEMO_APPS:
+        cmd = {"Flatpak": ["flatpak", "uninstall", "-y", "--noninteractive", ident], "Homebrew": ["brew", "uninstall", ident],
+               "rpm-ostree": ["rpm-ostree", "uninstall", ident], "Distrobox": ["distrobox", "rm", "-f", ident],
+               "Steam": ["steam", f"steam://uninstall/{ident}"], "System": ["rpm-ostree", "override", "remove", ident] if ident else []
+               }.get(source, ["gio", "trash", ident])
+        yield App(name, source, ver, human(mb * 2**20) if mb else "", cmd, icon, mb * 2**20, ident if source in ("AppImage", "Local") else "")
+
+
 SOURCES = ["Flatpak", "Homebrew", "rpm-ostree", "Distrobox", "AppImage", "Steam", "Local", "System"]
-BACKENDS = [flatpak_apps, brew_apps, ostree_apps, distrobox_apps, appimage_apps, desktop_apps]
+BACKENDS = [demo_apps] if DEMO else [flatpak_apps, brew_apps, ostree_apps, distrobox_apps, appimage_apps, desktop_apps]
 
 
 class Window(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, default_width=760, default_height=720)
+        super().__init__(application=app, default_width=860, default_height=700)
         self.gen = self.pending = self.count = 0
         self.updates = set()
         self.busy = ""
@@ -303,15 +339,14 @@ class Window(Adw.ApplicationWindow):
         self.set_content(self.toasts)
         self.refresh()
 
-    def make_icon(self, a):
-        img = Gtk.Image(pixel_size=32)
+    def make_icon(self, a):  # app icon if the theme or a file has one, else a coloured initials avatar
         if a.icon.startswith("/") and os.path.isfile(a.icon):
+            img = Gtk.Image(pixel_size=32)
             img.set_from_file(a.icon)
-        elif a.icon and self.theme.has_icon(a.icon):
-            img.set_from_icon_name(a.icon)
-        else:
-            img.set_from_icon_name(next((n for n in SOURCE_ICONS[a.source] if self.theme.has_icon(n)), "application-x-executable"))
-        return img
+            return img
+        if a.icon and self.theme.has_icon(a.icon):
+            return Gtk.Image(icon_name=a.icon, pixel_size=32)
+        return Adw.Avatar(size=32, text=a.name, show_initials=True)
 
     def row_button(self, icon, tip, cb):
         btn = Gtk.Button(icon_name=icon, tooltip_text=tip, valign=Gtk.Align.CENTER)
@@ -481,7 +516,7 @@ class Window(Adw.ApplicationWindow):
         errors = []
         try:
             for label, cmd in jobs:
-                r = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+                r = subprocess.run(["true"] if DEMO else cmd, capture_output=True, text=True, errors="replace")
                 if r.returncode:
                     errors.append(f"{label}: {(r.stderr.strip().splitlines() or [str(r.returncode)])[-1]}")
         except Exception as e:  # window must always become usable again
@@ -502,6 +537,7 @@ class Manager(Adw.Application):
                          flags=Gio.ApplicationFlags.NON_UNIQUE if SHOT else Gio.ApplicationFlags.FLAGS_NONE)
 
     def do_activate(self):
+        Gtk.Window.set_default_icon_name(APP_ID)
         win = self.props.active_window or Window(self)
         win.present()
         if SHOT:  # verification aid: save a window screenshot once apps have loaded, then quit

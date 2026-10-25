@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Manager: every app on your Linux desktop, one list</title>
+<meta name="description" content="A Control-Panel-style installed apps window for Linux. Flatpak, Homebrew, rpm-ostree, AppImage, Steam and more in one searchable list, with one-click remove and update.">
+<meta property="og:title" content="App Manager">
+<meta property="og:description" content="Every app on your Linux desktop in one list. Tick, remove, done.">
+<meta property="og:image" content="https://haloman363.github.io/app-manager/assets/main-dark.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon.png">
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --text: #16181d; --muted: #5b6270; --line: #e3e6ec;
+  --accent: #1a5fb4; --accent-2: #3584e4; --accent-text: #ffffff; --code-bg: #0f1218; --code-text: #e6e9ef;
+  --warn: #9a5b00;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101216; --surface: #181b21; --text: #eceff4; --muted: #9aa3b2; --line: #272b34;
+    --accent: #62a0ea; --accent-2: #3584e4; --accent-text: #08111f; --code-bg: #0a0c10; --code-text: #e6e9ef;
+    --warn: #f5c451;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.6;
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Cantarell, "Noto Sans", sans-serif; }
+a { color: var(--accent); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+.brand img { width: 32px; height: 32px; }
+.nav-links { display: flex; gap: 22px; align-items: center; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: .95rem; }
+.nav-links a:hover { color: var(--text); }
+.hero { text-align: center; padding: 56px 0 24px; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.1; margin: 0 0 16px; letter-spacing: -.02em; }
+.hero h1 span { background: linear-gradient(90deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lead { max-width: 640px; margin: 0 auto 28px; font-size: 1.15rem; color: var(--muted); }
+.btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 12px 22px; border-radius: 10px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--surface); }
+.btn.primary { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+.btn:hover { filter: brightness(1.08); }
+.shot { margin: 40px auto 0; max-width: 940px; }
+.shot img { width: 100%; height: auto; display: block; }
+section { padding: 64px 0 8px; }
+section h2 { font-size: 1.9rem; margin: 0 0 8px; letter-spacing: -.01em; }
+section .sub { color: var(--muted); margin: 0 0 28px; max-width: 640px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.card p { margin: 0; color: var(--muted); font-size: .94rem; }
+.card code { font-size: .85em; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--warn); margin-bottom: 6px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+.split img { width: 100%; height: auto; display: block; }
+ul.ticks { list-style: none; padding: 0; margin: 0; }
+ul.ticks li { padding-left: 28px; margin: 0 0 12px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 0; top: .45em; width: 14px; height: 8px; border-left: 3px solid var(--accent-2); border-bottom: 3px solid var(--accent-2); transform: rotate(-45deg); }
+.steps { counter-reset: s; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.step::before { counter-increment: s; content: counter(s); display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-2); color: #fff; font-weight: 700; margin-bottom: 8px; }
+.step h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.step p { margin: 0; color: var(--muted); font-size: .94rem; }
+.code { position: relative; background: var(--code-bg); color: var(--code-text); border-radius: 12px; padding: 18px 20px; font: 14px/1.7 ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, monospace; overflow-x: auto; white-space: pre; }
+.code .c { color: #7f8aa0; }
+.copy { position: absolute; top: 10px; right: 10px; background: #232834; color: #cfd6e4; border: 0; border-radius: 8px; padding: 6px 12px; font: 600 12px system-ui; cursor: pointer; }
+.copy:hover { background: #2c3342; }
+footer { margin-top: 72px; padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: .92rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; } .nav-links a.hide-sm { display: none; } .hero { padding-top: 32px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#"><img src="assets/icon.png" alt="">App Manager</a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#sources">Sources</a>
+      <a class="hide-sm" href="#safety">Safety</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/Haloman363/app-manager">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1>Every app on your Linux desktop.<br><span>One list.</span></h1>
+    <p class="lead">A Control-Panel-style installed apps window for immutable Fedora desktops. Flatpaks, Homebrew, AppImages, Steam games and more, all searchable, with a checkbox and a Remove button.</p>
+    <div class="btns">
+      <a class="btn primary" href="#install">Get started</a>
+      <a class="btn" href="https://github.com/Haloman363/app-manager">View on GitHub</a>
+    </div>
+    <div class="shot">
+      <picture>
+        <source srcset="assets/main-light.png" media="(prefers-color-scheme: light)">
+        <img src="assets/main-dark.png" alt="App Manager listing Flatpak, Homebrew, AppImage, Steam and system apps with sizes and update buttons">
+      </picture>
+    </div>
+  </header>
+
+  <section id="sources">
+    <h2>Eight sources, one window</h2>
+    <p class="sub">Software on a Bazzite or Silverblue desktop comes from everywhere. App Manager finds all of it and shows the exact command it would run to remove each one.</p>
+    <div class="grid">
+      <div class="card"><h3>Flatpak</h3><p>Remove apps and optionally their data. Update one app or all of them.</p></div>
+      <div class="card"><h3>Homebrew</h3><p>Only the formulae you installed, not dependencies, so nothing breaks by accident.</p></div>
+      <div class="card"><h3>rpm-ostree</h3><p>Layered packages, removed with <code>rpm-ostree uninstall</code>.</p></div>
+      <div class="card"><h3>Distrobox</h3><p>See your containers and delete the ones you no longer use.</p></div>
+      <div class="card"><h3>AppImage</h3><p>Finds <code>.AppImage</code> files and their launchers. Removal goes to the trash.</p></div>
+      <div class="card"><h3>Steam</h3><p>Your games and demos from the app menu, uninstalled through Steam itself.</p></div>
+      <div class="card"><h3>Local</h3><p>Apps you installed by hand and web apps, cleaned up with their folder.</p></div>
+      <div class="card"><span class="tag">Locked by default</span><h3>System</h3><p>Base-image apps, removable as a reversible rpm-ostree override.</p></div>
+    </div>
+  </section>
+
+  <section id="safety">
+    <div class="split">
+      <div>
+        <h2>Remove with confidence</h2>
+        <p class="sub">Every removal is spelled out before it runs. Nothing happens until you confirm.</p>
+        <ul class="ticks">
+          <li><strong>Exact commands shown.</strong> The dialog lists what will run, line by line.</li>
+          <li><strong>Recoverable by default.</strong> AppImage and local removals go to the trash.</li>
+          <li><strong>System apps are marked.</strong> They never get picked by select-all, and core packages like the Plasma shell are locked.</li>
+          <li><strong>Reversible base changes.</strong> Undo a system removal with <code>rpm-ostree override reset</code>.</li>
+        </ul>
+      </div>
+      <img src="assets/remove-dark.png" alt="Confirmation dialog listing the exact flatpak, brew and steam commands that will run">
+    </div>
+  </section>
+
+  <section>
+    <div class="split">
+      <img src="assets/system-dark.png" alt="System apps marked with an amber label, with core packages greyed out">
+      <div>
+        <h2>Know what you are touching</h2>
+        <p class="sub">Base-image apps carry an amber <em>System</em> label. Core packages show a greyed-out checkbox, so the one thing you cannot undo is the one thing you cannot click.</p>
+        <ul class="ticks">
+          <li>Search by typing anywhere, sort by name, size or source.</li>
+          <li>Per-source counts in the filter, update badges on every row.</li>
+          <li>Details for each app: version, size, install location, remove command.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install in a minute</h2>
+    <p class="sub">One Python file. Nothing to build, nothing to pip install. Needs GTK 4 and libadwaita, which Fedora KDE and GNOME already ship.</p>
+    <div class="steps">
+      <div class="step"><h3>Clone</h3><p>Grab the repo from GitHub.</p></div>
+      <div class="step"><h3>Add to your menu</h3><p>Run the install script once.</p></div>
+      <div class="step"><h3>Open it</h3><p>Search "App Manager" in your launcher.</p></div>
+    </div>
+    <br>
+    <div class="code" id="cmd"><button class="copy" type="button" aria-label="Copy commands">Copy</button><span class="c"># get it</span>
+git clone https://github.com/Haloman363/app-manager.git
+cd app-manager
+
+<span class="c"># add it to your application menu</span>
+./install-desktop.sh
+
+<span class="c"># or run it right now</span>
+./appmanager.py</div>
+  </section>
+
+  <footer>
+    <span>App Manager is open source under the MIT license.</span>
+    <span><a href="https://github.com/Haloman363/app-manager">Source on GitHub</a> · <a href="https://github.com/Haloman363/app-manager/issues">Report an issue</a></span>
+  </footer>
+</div>
+<script>
+document.querySelector(".copy").addEventListener("click", function () {
+  var box = document.getElementById("cmd");
+  var text = box.innerText.replace(/^Copy\n?/, "").replace(/^\s+/, "");
+  var btn = this;
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () {
+    btn.textContent = "Copied";
+    setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+  }, function () { btn.textContent = "Press Ctrl+C"; });
+});
+</script>
+</body>
+</html>
