@@ -1,0 +1,29 @@
+name: tests
+on: [push, pull_request]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
+      - run: python3 -m unittest discover -s tests -v
+      - run: python3 appmanager.py --version && python3 appmanager.py --demo --list | wc -l
+
+  fedora:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: dnf install -y python3-gobject gtk4 libadwaita
+      - run: python3 -m unittest discover -s tests -v
+      - run: python3 appmanager.py --version && python3 appmanager.py --demo --list | wc -l
+
+  arch:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - run: pacman -Syu --noconfirm python-gobject gtk4 libadwaita git
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s tests -v
+      - run: python3 appmanager.py --version && python3 appmanager.py --demo --list | wc -l

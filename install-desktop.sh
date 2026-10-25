@@ -12,7 +12,7 @@ cat > "$dest" <<DESKTOP
 Type=Application
 Name=App Manager
 Comment=View and uninstall Flatpak, Homebrew, rpm-ostree, Distrobox, AppImage, Steam and local apps
-Exec=/usr/bin/python3 $here/appmanager.py
+Exec=python3 "$here/appmanager.py"
 Icon=io.github.haloman363.AppManager
 Categories=System;PackageManager;
 Terminal=false

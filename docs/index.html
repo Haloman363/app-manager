@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>App Manager: every app on your Linux desktop, one list</title>
-<meta name="description" content="A Control-Panel-style installed apps window for Linux. Flatpak, Homebrew, rpm-ostree, AppImage, Steam and more in one searchable list, with one-click remove and update.">
+<meta name="description" content="A Control-Panel-style installed apps window for any Linux distro. Flatpak, Snap, Homebrew, apt, dnf, pacman, AppImage, Steam and more in one searchable list, with one-click remove, update and automatic updates.">
 <meta property="og:title" content="App Manager">
 <meta property="og:description" content="Every app on your Linux desktop in one list. Tick, remove, done.">
-<meta property="og:image" content="https://haloman363.github.io/app-manager/assets/main-dark.png">
+<meta property="og:image" content="https://appmanager.haloman.meme/assets/main-dark.png">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://appmanager.haloman.meme/">
+<link rel="canonical" href="https://appmanager.haloman.meme/">
 <link rel="icon" href="assets/icon.png">
 <style>
 :root {
@@ -79,6 +81,7 @@ footer { margin-top: 72px; padding: 28px 0 48px; border-top: 1px solid var(--lin
     <div class="nav-links">
       <a class="hide-sm" href="#sources">Sources</a>
       <a class="hide-sm" href="#safety">Safety</a>
+      <a class="hide-sm" href="#updates">Updates</a>
       <a href="#install">Install</a>
       <a href="https://github.com/Haloman363/app-manager">GitHub</a>
     </div>
@@ -86,7 +89,7 @@ footer { margin-top: 72px; padding: 28px 0 48px; border-top: 1px solid var(--lin
 
   <header class="hero">
     <h1>Every app on your Linux desktop.<br><span>One list.</span></h1>
-    <p class="lead">A Control-Panel-style installed apps window for immutable Fedora desktops. Flatpaks, Homebrew, AppImages, Steam games and more, all searchable, with a checkbox and a Remove button.</p>
+    <p class="lead">A Control-Panel-style installed apps window for any Linux distro. Flatpaks, Snaps, Homebrew, AppImages, Steam games and your distro's own packages, all searchable, with a checkbox and a Remove button.</p>
     <div class="btns">
       <a class="btn primary" href="#install">Get started</a>
       <a class="btn" href="https://github.com/Haloman363/app-manager">View on GitHub</a>
@@ -100,17 +103,18 @@ footer { margin-top: 72px; padding: 28px 0 48px; border-top: 1px solid var(--lin
   </header>
 
   <section id="sources">
-    <h2>Eight sources, one window</h2>
-    <p class="sub">Software on a Bazzite or Silverblue desktop comes from everywhere. App Manager finds all of it and shows the exact command it would run to remove each one.</p>
+    <h2>Ten sources, one window</h2>
+    <p class="sub">Software comes from everywhere. App Manager finds all of it, on Fedora, Ubuntu, Debian, Arch, openSUSE and their relatives, and shows the exact command it would run to remove each one.</p>
     <div class="grid">
       <div class="card"><h3>Flatpak</h3><p>Remove apps and optionally their data. Update one app or all of them.</p></div>
+      <div class="card"><h3>Snap</h3><p>Snap apps without the runtimes and bases that come with them.</p></div>
       <div class="card"><h3>Homebrew</h3><p>Only the formulae you installed, not dependencies, so nothing breaks by accident.</p></div>
-      <div class="card"><h3>rpm-ostree</h3><p>Layered packages, removed with <code>rpm-ostree uninstall</code>.</p></div>
-      <div class="card"><h3>Distrobox</h3><p>See your containers and delete the ones you no longer use.</p></div>
+      <div class="card"><h3>rpm-ostree</h3><p>Layered packages on Bazzite, Silverblue and Kinoite.</p></div>
+      <div class="card"><h3>Distrobox &amp; Toolbox</h3><p>See your containers and delete the ones you no longer use.</p></div>
       <div class="card"><h3>AppImage</h3><p>Finds <code>.AppImage</code> files and their launchers. Removal goes to the trash.</p></div>
       <div class="card"><h3>Steam</h3><p>Your games and demos from the app menu, uninstalled through Steam itself.</p></div>
       <div class="card"><h3>Local</h3><p>Apps you installed by hand and web apps, cleaned up with their folder.</p></div>
-      <div class="card"><span class="tag">Locked by default</span><h3>System</h3><p>Base-image apps, removable as a reversible rpm-ostree override.</p></div>
+      <div class="card"><span class="tag">Asks first</span><h3>System</h3><p>Your distro's own packages through <code>apt</code>, <code>dnf</code>, <code>pacman</code>, <code>zypper</code> or an rpm-ostree override.</p></div>
     </div>
   </section>
 
@@ -145,16 +149,35 @@ footer { margin-top: 72px; padding: 28px 0 48px; border-top: 1px solid var(--lin
     </div>
   </section>
 
+  <section id="updates">
+    <div class="split">
+      <div>
+        <h2>Stay up to date</h2>
+        <p class="sub">Updates show up as a button on the row. Update one app, update everything, or let App Manager do it for you.</p>
+        <ul class="ticks">
+          <li><strong>One-click updates</strong> for Flatpak, Homebrew, Snap and AppImage apps.</li>
+          <li><strong>Automatic updates.</strong> Flip one switch and a daily systemd timer keeps your apps current in the background.</li>
+          <li><strong>Self-updating.</strong> A banner tells you when a new App Manager release is out, and updates a git checkout in one click.</li>
+          <li><strong>Leftovers cleanup.</strong> Optionally move an app's config and data folders to the trash when you remove it.</li>
+        </ul>
+      </div>
+      <img src="assets/leftovers-dark.png" alt="Removal dialog offering to also move leftover config and data to the trash">
+    </div>
+  </section>
+
   <section id="install">
     <h2>Install in a minute</h2>
-    <p class="sub">One Python file. Nothing to build, nothing to pip install. Needs GTK 4 and libadwaita, which Fedora KDE and GNOME already ship.</p>
+    <p class="sub">One Python file. Nothing to build, nothing to pip install. Needs GTK 4, libadwaita 1.5+ and PyGObject, which current Fedora, Ubuntu 24.04+, Debian 13+ and Arch ship or install in one command.</p>
     <div class="steps">
       <div class="step"><h3>Clone</h3><p>Grab the repo from GitHub.</p></div>
       <div class="step"><h3>Add to your menu</h3><p>Run the install script once.</p></div>
       <div class="step"><h3>Open it</h3><p>Search "App Manager" in your launcher.</p></div>
     </div>
     <br>
-    <div class="code" id="cmd"><button class="copy" type="button" aria-label="Copy commands">Copy</button><span class="c"># get it</span>
+    <div class="code" id="cmd"><button class="copy" type="button" aria-label="Copy commands">Copy</button><span class="c"># dependencies (skip if you already have them)</span>
+sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-adw-1     <span class="c"># Debian / Ubuntu</span>
+
+<span class="c"># get it</span>
 git clone https://github.com/Haloman363/app-manager.git
 cd app-manager
 
