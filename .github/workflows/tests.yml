@@ -15,7 +15,7 @@ jobs:
     container: fedora:latest
     steps:
       - uses: actions/checkout@v4
-      - run: dnf install -y python3-gobject gtk4 libadwaita
+      - run: dnf install -y python3-gobject gobject-introspection gtk4 libadwaita
       - run: python3 -m unittest discover -s tests -v
       - run: python3 appmanager.py --version && python3 appmanager.py --demo --list | wc -l
 

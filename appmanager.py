@@ -33,7 +33,7 @@ try:
     assert hasattr(Adw, "AlertDialog")  # libadwaita 1.5+
 except (ImportError, ValueError, AssertionError) as e:
     sys.exit(f"App Manager needs PyGObject, GTK 4 and libadwaita 1.5+ ({e or 'libadwaita is too old'}).\n"
-             "  Fedora:        sudo dnf install python3-gobject gtk4 libadwaita\n"
+             "  Fedora:        sudo dnf install python3-gobject gobject-introspection gtk4 libadwaita\n"
              "  Debian/Ubuntu: sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-adw-1\n"
              "  Arch:          sudo pacman -S python-gobject gtk4 libadwaita\n"
              "  openSUSE:      sudo zypper install python3-gobject typelib-1_0-Gtk-4_0 typelib-1_0-Adw-1")

@@ -48,7 +48,7 @@ and PyGObject. If something is missing, App Manager tells you the command for yo
 
 | Distro | Install the dependencies |
 |--------|--------------------------|
-| Fedora (all variants) | `sudo dnf install python3-gobject gtk4 libadwaita` (already installed on KDE and GNOME) |
+| Fedora (all variants) | `sudo dnf install python3-gobject gobject-introspection gtk4 libadwaita` (already installed on KDE and GNOME) |
 | Ubuntu 24.04+, Debian 13+ | `sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-adw-1` |
 | Arch, Manjaro | `sudo pacman -S python-gobject gtk4 libadwaita` |
 | openSUSE | `sudo zypper install python3-gobject typelib-1_0-Gtk-4_0 typelib-1_0-Adw-1` |
